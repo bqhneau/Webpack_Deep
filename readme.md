@@ -181,4 +181,64 @@ name = 'ben' // Uncaugt TypeError:Assignment to constant
     import ('./webpack-demo').then((module)=>{console.log(module)})
 ```
 
+## 模块打包工具由来
+- 1、浏览器兼容性问题
+- 2、模块文件多，网络请求频繁
+- 3、处理非 JavaScript 资源的能力有限
+
+> 设想：
+> 1、能够编译代码 => 解决兼容性问题
+> 2、将散落的文件打包到一起 => 解决网络请求频繁
+> 3、多类型模块支持 => 解决处理非 JavaScript 资源的能力有限
+
+
+## 模块打包工具-概要
+    对整个前端的模块化
+- 1、模块打包器
+- 2、模块加载器
+- 3、代码拆分（Code Spliting）
+- 4、资源模块（支持多类型文件）
+
+
+## webpack 快速上手
+- 1、下载依赖 
+```bash
+    npm install -g serve
+    npm install webpack webpack-cli
+```
+- 2、配置打包脚本
+```bash
+"scripts": {
+    "build": "webpack"
+}
+```
+- 3、使用命令行打包
+```bash
+    npm run build
+```
+
+
+## webpack 入口和出口
+```js
+module.exports = {
+  // 指定入口
+  entry: './src/main.js',
+
+  // 指定出口
+  output: {
+    filename: 'bundle.js',
+    path: path.join(__dirname, 'output')
+  }
+}
+```
+
+## webpack 工作模式
+    不配置默认为「生产模式；通过 mode 配置
+- mode：production  => 生产模式
+- mode：development => 开发模式
+- mode：none => 原始模式
+
+
+## webpack 打包结果运行原理
+
  
