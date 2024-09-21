@@ -241,4 +241,141 @@ module.exports = {
 
 ## webpack 打包结果运行原理
 
- 
+## 处理 CSS
+    webpack只能处理js文件，需要专门的加载器（loader）处理 CSS
+- css-loader 只负责将css解析
+- style-loader 将解析后的结果通过 `style` 放到页面上
+- 多个 loader 执行顺序 => 由后向前
+```js
+    module: {
+        rules: [
+        {
+            test: /.css$/,
+            use: [
+                // 多个 loader 执行顺序 => 由后向前
+                'style-loader',
+                'css-loader'
+            ]
+        }
+        ]
+    }
+```
+
+## 为什么 webpack 在js中引入其他资源
+- 逻辑合理 js确实需要这些资源文件
+- 确保上线资源不缺失 都是必要的
+
+## 常用 loader 分类
+- 编译转换类（css-loader..）
+- 文件操作类（file-loader..）
+    将文件拷贝 并导出文件访问路径
+- 代码检查类（eslint-loader..）
+    统一代码风格，提高代码质量
+
+## 其他加载器（loader）
+### 1、文件资源加载器_file-loader
+    合理处理「图片/字体」等文件
+```js
+output: {
+    filename: 'bundle.js',
+    path: path.join(__dirname, 'dist'),
+    // 【注意】搭配 file-loader使用
+    publicPath: 'dist/'
+  },
+module：{
+    rules:[
+        {
+            test: /.png$/,
+            use: 'file-loader'
+        }
+    ]
+}
+```
+
+### 2、文件资源加载器_url-loader
+    同样用来处理 图片/字体等文件
+    「区别在于」：导出时会转换成 date：url形式（base64编码），而不是单独的物理文件
+```js
+output: {
+    filename: 'bundle.js',
+    path: path.join(__dirname, 'dist'),
+    // 【注意】搭配 url-loader使用
+    publicPath: 'dist/'
+  },
+module：{
+    rules:[
+        {
+            test: /.png$/,
+            use: {
+                loader: 'url-loader',
+                options: {
+                    // 这里文件大小超限后 会默认找「file-loader」
+                    limit: 10 * 1024 // 限制文件大小 10kb
+                }
+            }
+      }
+    ]
+}
+```
+
+> 最佳实践
+> - 小文件使用 Data URls，减少请求次数（url-loader）
+> - 大文件单独提取存放 提高加载速度（file-loader）
+
+
+### 3、baber-loader
+    将 ES6 代码转化为 浏览器所识别的代码（兼容性）
+```js
+module: {
+    rules: [
+      {
+        test: /.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            // 搭配 插件使用
+            presets: ['@babel/preset-env']
+          }
+        }
+      },
+    ]
+}
+```
+
+### 4、html-loader
+    将 html 转化为 js模块，以便 webpack 识别
+```js
+module: {
+    rules: [
+      {
+        test: /.html$/,
+        use: {
+          loader: 'html-loader',
+          options: {
+            // 默认仅支持‘img：src’，可配置其他支持项
+            attrs：['img:src','a:href']
+          }
+        }
+      },
+    ]
+}
+```
+
+
+## webpack 加载资源的方式
+    兼容多种模块化标准
+- ES Moudles 标准的 import
+- CommonJS 标准的 require
+- AMD 标准的 define 和 require
+
+- 样式代码中的 @import 和 url函数
+- HTML 代码中图片标签的src属性，href需要单独配置
+
+> 选用一个标准使用 不要混用
+
+
+## webpack 核心工作原理
+- 1、找到打包入口
+- 2、根据入口文件中的import等语句，寻找依赖，形成每一模块的依赖树
+- 3、递归依赖树 找到每个节点所需的资源文件 按照加载器对应加载
+- 4、将加载结果放到 bundle

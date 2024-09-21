@@ -15,6 +15,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
+            // 搭配 插件使用
             presets: ['@babel/preset-env']
           }
         }

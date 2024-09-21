@@ -6,6 +6,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.join(__dirname, 'dist'),
+    // 搭配 file-loader使用
     publicPath: 'dist/'
   },
   module: {
