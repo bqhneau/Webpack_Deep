@@ -379,3 +379,39 @@ module: {
 - 2、根据入口文件中的import等语句，寻找依赖，形成每一模块的依赖树
 - 3、递归依赖树 找到每个节点所需的资源文件 按照加载器对应加载
 - 4、将加载结果放到 bundle
+
+
+## 手写一个 marked-loader
+    核心思路：明确输入和输出
+- 输入：加载到的资源内容
+- 输出：转化后的结果
+
+### marked-loader
+```js
+const marked = require('marked')
+
+// 输入为资源
+module.exports = source => {
+  
+  const html = marked(source)
+
+  // 输出为转化后的结果
+  // 返回 html 字符串交给下一个 loader 处理
+  return html
+}
+```
+
+### 使用loader
+```js
+module: {
+    rules: [
+      {
+        test: /.md$/,
+        use: [
+          'html-loader',  // marked 返回的是html，需要 html-loader 
+          './markdown-loader'
+        ]
+      }
+    ]
+  }
+```
