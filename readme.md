@@ -415,3 +415,70 @@ module: {
     ]
   }
 ```
+
+
+## 插件 Plugin 
+    解决除了资源加载以外，其他的「自动化工作」
+- 清除 dist 目录
+- 拷贝静态文件到输出目录
+- 压缩输出代码
+
+### 1、clean-webpack-plugin
+    每次打包前打包前「自动清除输出目录」 
+```js
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
+plugins: [
+    new CleanWebpackPlugin()
+  ]
+```
+
+### 2、html-webpack-plugin
+    自动生成使用打包结果（bundle.js）的 html
+
+> 问题背景
+> 之前： 项目目录下新建一个 index.html
+> 现在： 由 webpack 负责生成这个 html ，并将打包结果插入
+> 好处： 不同担心「打包路径引用问题」
+
+```js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  ...
+  plugins: [
+    // 用于生成 index.html
+    new HtmlWebpackPlugin({
+      title: 'Webpack Plugin Sample',
+      meta: {
+        viewport: 'width=device-width'
+      },
+      template: './src/index.html'
+    }),
+    // 用于生成 about.html - 多次创建页面
+    new HtmlWebpackPlugin({
+      filename: 'about.html'
+    })
+  ]
+}
+```
+
+### 3、copy-webpack-plugin
+    用于将不需要参与构建的 静态文件（public） ，复制到 dist 文件
+
+```js
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+
+module.exports = {
+  ...
+  plugins: [
+    ...
+    // 将不需要参与构建的文件 复制到 dist
+    new CopyWebpackPlugin([
+      // 'public/**'
+      'public'
+    ])
+  ]
+}
+
+```

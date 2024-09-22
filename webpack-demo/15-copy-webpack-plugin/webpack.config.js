@@ -45,6 +45,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       filename: 'about.html'
     }),
+
+    // 将不需要参与构建的文件 复制到 dist
     new CopyWebpackPlugin([
       // 'public/**'
       'public'
