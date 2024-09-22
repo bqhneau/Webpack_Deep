@@ -541,7 +541,7 @@ class MyPlugin {
 
 
 ### devServer
-- 1、自动打包
+- 1、自动打包 并刷新浏览器
 - 2、静态资源访问 contentBase
 - 3、配置代理服务器 proxy
 ```js
@@ -592,4 +592,84 @@ devServer: {
     1、Source Map 会暴漏源代码
     2、调试是开发阶段的问题
     3、折中考虑使用 nosources-source-map 
+```
+
+### HMR 热更新
+> 问题背景：想要在不刷新页面的前提下，更新页面（区别于devServer）
+> 问题解决：开启热更新
+
+```
+  devServer 和 HMR 对比
+    1、devServer
+      devServer 的核心作用是提供一个轻量的开发服务器，让开发者能够快速看到项目的修改效果，并自动刷新页面。
+    2、HMR
+      HMR 是 Webpack 的一种增强功能，允许在「不刷新」整个页面的情况下，替换、添加或删除模块。这在开发过程中极大提升了效率，尤其是在调试和调整 UI 的时候。
+```
+
+- webpack 开启 HMR
+```js
+  const webpack = require('webpack')
+
+  // 开启 HMR
+  devServer: {
+    hot: true
+    // hotOnly: true // 只使用 HMR，不会 fallback 到 live reloading
+  },
+
+  ...
+
+  plugins: [
+    ...
+    // 使用 插件
+    new webpack.HotModuleReplacementPlugin()
+  ]
+```
+
+> 存在的问题
+>   1、样式文件可以热替换
+>   2、脚本文件不可以 需要自己手动处理
+>   3、框架开发脚本/样式均可以热替换，因为脚本「有规律可循」
+
+
+- 使用 HMR API
+```js
+  // 注册某个模块热更新的处理模块
+  module.hot.accept('文件路径', () => {
+    console.log('editor 模块更新了，需要这里手动处理热替换逻辑')
+  })
+```
+
+- JS 模块 热替换
+```js
+if (module.hot) {
+  let lastEditor = editor
+  module.hot.accept('./editor', () => {
+
+    // 去除之前的内容
+    const value = lastEditor.innerHTML
+    document.body.removeChild(lastEditor)
+    // 替换新的内容
+    const newEditor = createEditor()
+    newEditor.innerHTML = value
+    document.body.appendChild(newEditor)
+    lastEditor = newEditor
+  })
+}
+```
+
+- 图片 热替换
+```js
+if (module.hot) {
+
+  module.hot.accept('./better.png', () => {
+    // 替换图片的 src
+    img.src = background
+  })
+}
+```
+
+- HMR 注意事项
+```
+  1、使用 hotOnly => 解决报错被自动刷新
+  2、HMR 要搭配插件使用
 ```

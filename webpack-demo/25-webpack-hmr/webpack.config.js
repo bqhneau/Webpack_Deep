@@ -32,6 +32,8 @@ module.exports = {
       title: 'Webpack Tutorial',
       template: './src/index.html'
     }),
+
+    // 搭配插件使用
     new webpack.HotModuleReplacementPlugin()
   ]
 }
