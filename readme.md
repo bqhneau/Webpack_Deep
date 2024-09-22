@@ -273,6 +273,9 @@ module.exports = {
     统一代码风格，提高代码质量
 
 ## 其他加载器（loader）
+> 1、在本质上，loader 就是一个导出为函数的 JavaScript 模块。这个函数接受源代码作为输入，经过处理后返回新的代码或转换结果。WebPack 通过这些 loader 执行不同的资源处理。
+
+> 2、可以说 Webpack 的 loader 就像是一个管道（pipeline）。每个 loader 都是这个管道中的一个环节，文件经过一系列 loader 的处理后，最终被转换为 Webpack 能理解和打包的模块。
 ### 1、文件资源加载器_file-loader
     合理处理「图片/字体」等文件
 ```js
@@ -480,5 +483,39 @@ module.exports = {
     ])
   ]
 }
-
 ```
+
+
+## 手写 plugin
+> 本质：通过「钩子机制」实现，即在生命周期钩子(compiler.hooks)注册相应的事件(钩子)实现扩展
+> 官网：plugin 必须是一个函数或者是一个包含 apply 方法的对象
+
+```js
+class MyPlugin {
+  apply (compiler) {
+    console.log('MyPlugin 启动')
+
+    // 1、在 emit 阶段挂载 tap 事件
+    // 参数一：插件名 
+    // 参数二：上下文
+    compiler.hooks.emit.tap('MyPlugin', compilation => {
+      // compilation => 可以理解为此次打包的上下文
+      for (const name in compilation.assets) {
+        // console.log(name)
+        // 每个文件内容：compilation.assets[name].source()
+        if (name.endsWith('.js')) {
+          const contents = compilation.assets[name].source()
+          // 2、用「正则」删掉多余注释
+          const withoutComments = contents.replace(/\/\*\*+\*\//g, '')
+          // 3、替换资源内容
+          compilation.assets[name] = {
+            source: () => withoutComments,
+            size: () => withoutComments.length
+          }
+        }
+      }
+    })
+  }
+}
+```
+

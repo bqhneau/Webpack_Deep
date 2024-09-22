@@ -7,11 +7,13 @@ class MyPlugin {
   apply (compiler) {
     console.log('MyPlugin 启动')
 
+    // 在 emit 阶段 注册 tap 事件
+    // 接受两个参数： 插件名 、此次打包上下文
     compiler.hooks.emit.tap('MyPlugin', compilation => {
       // compilation => 可以理解为此次打包的上下文
       for (const name in compilation.assets) {
         // console.log(name)
-        // console.log(compilation.assets[name].source())
+        // console.log(compilation.assets[name].source())  获取文件内容
         if (name.endsWith('.js')) {
           const contents = compilation.assets[name].source()
           const withoutComments = contents.replace(/\/\*\*+\*\//g, '')
