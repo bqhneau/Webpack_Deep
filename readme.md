@@ -982,7 +982,8 @@ optimization: {
   }
 ```
 
-### MiniCssExtractPlugin 
+### CSS 优化
+#### MiniCssExtractPlugin 
 - 作用：提取 CSS 到一个单独的文件中
 - 实现 CSS 文件的按需加载
 
@@ -1025,7 +1026,7 @@ module.exports = {
 }
 ```
 
-### OptimizeCssAssetsWebpackPlugin
+#### OptimizeCssAssetsWebpackPlugin
 - 作用：压缩 CSS 文件
 ```js
 optimization: {
@@ -1033,5 +1034,15 @@ optimization: {
       new TerserWebpackPlugin(), // 保证 js 压缩器 正常
       new OptimizeCssAssetsWebpackPlugin()
     ]
+},
+```
+
+### 输出文件名hash 与 HTTP缓存
+- 作用：对静态资源强制缓存，只有文件名改变才重新获取
+- 如何使用：生产模式下，文件名使用 Hash
+```js
+output: {
+    // [contenthash]：与文件内容相关的哈希
+    filename: '[name]-[contenthash:8].bundle.js'
 },
 ```
