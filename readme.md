@@ -921,12 +921,12 @@ module: {
 ```
 
 
-## 代码分割(Code Splitting)
+### 代码分割(Code Splitting)
 - 存在的问题：bundle 体积过大，首次加载并不需要所有模块
 - 解决：分成多个 bundle， 根据实际情况去加载 bundle
 - 平衡：分块太多，又会增加请求数量，物极必反，寻找平衡
 
-### 多入口打包
+#### 多入口打包
 - 适用于「多页面应用」
 - 1、一个页面 => 一个 entry
 ```js
@@ -964,7 +964,7 @@ optimization: {
 }
 ```
 
-### 动态导入
+#### 动态导入
 - 实现按需加载
 - 动态导入的模块会被「自动分包」
 - 而且会自动提取公共模块
@@ -980,4 +980,58 @@ optimization: {
       mainElement.appendChild(album())
     })
   }
+```
+
+### MiniCssExtractPlugin 
+- 作用：提取 CSS 到一个单独的文件中
+- 实现 CSS 文件的按需加载
+
+```js
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin')
+const TerserWebpackPlugin = require('terser-webpack-plugin')
+
+module.exports = {
+  mode: 'none',
+  entry: {
+    main: './src/index.js'
+  },
+  output: {
+    filename: '[name].bundle.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          // 取代'style-loader', 
+          MiniCssExtractPlugin.loader,
+          'css-loader'
+        ]
+      }
+    ]
+  },
+  plugins: [
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      title: 'Dynamic import',
+      template: './src/index.html',
+      filename: 'index.html'
+    }),
+    new MiniCssExtractPlugin()
+  ]
+}
+```
+
+### OptimizeCssAssetsWebpackPlugin
+- 作用：压缩 CSS 文件
+```js
+optimization: {
+    minimizer: [
+      new TerserWebpackPlugin(), // 保证 js 压缩器 正常
+      new OptimizeCssAssetsWebpackPlugin()
+    ]
+},
 ```
