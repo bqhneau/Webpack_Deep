@@ -11,17 +11,18 @@ module.exports = {
     path: path.join(__dirname, 'dist')
   },
   devServer: {
+    // 指定静态资源路径 webpack5 改为 stasic
     contentBase: './public',
     proxy: {
       '/api': {
         // http://localhost:8080/api/users -> https://api.github.com/api/users
-        target: 'https://api.github.com',
+        target: 'https://api.github.com', // 目标地址
         // http://localhost:8080/api/users -> https://api.github.com/users
         pathRewrite: {
-          '^/api': ''
+          '^/api': ''  // 重写路径
         },
         // 不能使用 localhost:8080 作为请求 GitHub 的主机名
-        changeOrigin: true
+        changeOrigin: true  // 更改 origin
       }
     }
   },

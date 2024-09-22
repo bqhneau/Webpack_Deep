@@ -466,7 +466,7 @@ module.exports = {
 }
 ```
 
-### 3、copy-webpack-plugin
+### 3、copy-webpack-plugin（开发阶段慎用 上线前使用）
     用于将不需要参与构建的 静态文件（public） ，复制到 dist 文件
 
 ```js
@@ -519,3 +519,46 @@ class MyPlugin {
 }
 ```
 
+## 理想的开发体验
+- 1、HTTP-serve 运行
+- 2、自动编译 + 及时更新
+- 3、提供 source-map 支持
+
+### watch 模式
+    监听文件变化，自动更新打包
+```bash
+    webpack --watch
+```
+
+### BrowserSync
+    自动刷新浏览器,监听浏览器变化
+```bash
+同时开启两个终端
+    webpack --watch
+    browser-sync dist --files "**/*"
+```
+> 缺点：效率低 2次磁盘读写 浪费性能
+
+
+### devServer
+- 1、自动打包并刷新浏览器
+- 2、静态资源访问 contentBase
+- 3、配置代理服务器 proxy
+```js
+devServer: {
+    // 指定静态资源路径 webpack5 改为 stasic
+    contentBase: './public',
+    proxy: {
+      '/api': {
+        // http://localhost:8080/api/users -> https://api.github.com/api/users
+        target: 'https://api.github.com', // 目标地址
+        // http://localhost:8080/api/users -> https://api.github.com/users
+        pathRewrite: {
+          '^/api': ''  // 重写路径
+        },
+        // 不能使用 localhost:8080 作为请求 GitHub 的主机名
+        changeOrigin: true  // 更改 origin
+      }
+    }
+  },
+```
