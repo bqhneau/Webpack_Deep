@@ -541,7 +541,7 @@ class MyPlugin {
 
 
 ### devServer
-- 1、自动打包并刷新浏览器
+- 1、自动打包
 - 2、静态资源访问 contentBase
 - 3、配置代理服务器 proxy
 ```js
@@ -561,4 +561,35 @@ devServer: {
       }
     }
   },
+```
+
+### Source Map
+    源代码地图 => 开发环境定位错误
+> 总结：解决编写代码与运行代码不一致的调试问题
+
+- 配置 devtool 开启 Source Map
+```bash
+    devtool: 'sourse-map'
+```
+
+- devtool 不同模式下的对比
+
+```
+  eval模式：只能定位到某个文件，不能定位到具体的行列
+  eval-source-map：能定位到某个文件和具体的行列
+  cheap-eval-source-map：阉割版，只能定位到行，不能定位到列
+  cheap-module-eval-source-map：未经过 loader 加工
+  nosources-source-map:会给出具体的行，但点击后控制台不会暴露代码
+```
+
+- 选择合适的 Source Map
+```
+  开发模式：cheap-module-eval-source-map
+    1、每行代码不会超过 80 字符
+    2、使用框架经过 loader 转换后的代码差异较大
+
+  生产模式：none
+    1、Source Map 会暴漏源代码
+    2、调试是开发阶段的问题
+    3、折中考虑使用 nosources-source-map 
 ```
