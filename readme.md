@@ -815,3 +815,107 @@ module.exports = merge(common, {
 })
 
 ```
+
+
+## webpack 与 性能优化
+
+### definePlugin
+    webpack 内置插件，为代码注入全局成员（例如：API_BASE_URL）
+```js
+plugins: [
+    new webpack.DefinePlugin({
+      // 值要求的是一个代码片段
+      API_BASE_URL: JSON.stringify('https://api.example.com')
+    })
+  ]
+```
+
+### Tree Shaking(树摇)
+- 自动检测并将「未引用代码」去除，减少打包体积
+- 在 生产环境 自动开启
+
+> 注意：
+- `Tree Shaking` 并不是 某个配置选项
+- 而是一组功能搭配使用后的效果
+- 在 production 模式下自动开启
+
+#### 具体使用
+- useExports 负责标记「枯树叶」
+- minimize 负责「摇掉」它们
+```js
+  optimization: {
+    // 模块只导出被使用的成员
+    usedExports: true,
+    // 压缩输出结果
+    minimize: true
+  }
+```
+
+#### concatenateModules 继续优化
+- 尽可能将所有模块输出到一个函数
+```js
+optimization: {
+    // 模块只导出被使用的成员
+    usedExports: true,
+    // 压缩输出结果
+    minimize: true,
+    //「继续优化」尽可能合并每一个模块到一个函数中
+    concatenateModules: true
+  }
+```
+
+#### Tree Shaking 与 babel
+- 树摇的前提：必须使用 ESM 模块化
+- 解决：如果使用 babel-loader，则需做相关配置({ modules: false })
+
+```js
+module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              // 如果 Babel 加载模块时已经转换了 ESM，则会导致 Tree Shaking 失效
+              // ['@babel/preset-env', { modules: 'commonjs' }]
+              // ['@babel/preset-env', { modules: false }]
+              // 也可以使用默认配置，也就是 auto，这样 babel-loader 会自动关闭 ESM 转换
+              ['@babel/preset-env', { modules: 'auto' }]
+            ]
+          }
+        }
+      }
+    ]
+  },
+```
+
+#### Tree Shaking 与 sideEffects
+> Webpack在进行树摇时，会查看每个模块的package.json中的sideEffects属性，以确保未使用的代码是无副作用的。如果设置为false，则表示模块没有副作用，Webpack可以安全地删除未被使用的导出。
+- sideEffects 一般用于 npm包 标记是否有副作用
+- 在 生产模式 默认开启，其他模式 通过如下代码开启
+```js
+  optimization: {
+      sideEffects: true,  // 开启 sideEffects
+  }
+```
+
+> 使用： 在 package.json 包下面配置
+```js
+// package.json
+{
+    "name": "your-package",
+    "sideEffects": false  // 标识无副作用
+}
+```
+
+> 确实有副作用：
+- 在sideEffects属性中明确指出哪些文件有副作用，例如：
+```js
+// package.json
+{
+    "sideEffects": [
+        "./src/some-side-effectful-file.js"
+    ]
+}
+```
