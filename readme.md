@@ -673,3 +673,145 @@ if (module.hot) {
   1、使用 hotOnly => 解决报错被自动刷新
   2、HMR 要搭配插件使用
 ```
+
+## 生产环境优化
+
+### 不同环境下的配置
+- 1、配置文件根据环境不同导出不同配置(env)
+  - 适用于 小型项目
+```js
+module.exports = (env, argv) => {
+  // env 环境名参数
+  // argv 运行 cli 产生的所有参数
+  const config = {
+    mode: 'development',
+    entry: './src/main.js',
+    output: {
+      filename: 'js/bundle.js'
+    },
+    devtool: 'cheap-eval-module-source-map',
+    devServer: {
+      hot: true,
+      contentBase: 'public'
+    },
+    module: {
+      rules: [
+        {
+          test: /\.css$/,
+          use: [
+            'style-loader',
+            'css-loader'
+          ]
+        },
+        {
+          test: /\.(png|jpe?g|gif)$/,
+          use: {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'img',
+              name: '[name].[ext]'
+            }
+          }
+        }
+      ]
+    },
+    plugins: [
+      new HtmlWebpackPlugin({
+        title: 'Webpack Tutorial',
+        template: './src/index.html'
+      }),
+      new webpack.HotModuleReplacementPlugin()
+    ]
+  }
+
+  // 根据环境变量 => 判断环境 => 进行相应配置
+  if (env === 'production') {
+    config.mode = 'production'
+    config.devtool = false
+    config.plugins = [
+      ...config.plugins,
+      new CleanWebpackPlugin(),
+      new CopyWebpackPlugin(['public'])
+    ]
+  }
+
+  return config
+}
+```
+
+- 2、一个环境对应一个配置文件
+    使用 `merge` 方法, 命令行：webpack --config 文件名
+  - 开发配置(webpack.dev.js) 
+  - 生产配置(webpack.prod.js) 
+  - 公共配置（webpack.common.js）
+```js
+// webpack.common.js
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+module.exports = {
+  entry: './src/main.js',
+  output: {
+    filename: 'js/bundle.js'
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          'css-loader'
+        ]
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            outputPath: 'img',
+            name: '[name].[ext]'
+          }
+        }
+      }
+    ]
+  },
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Webpack Tutorial',
+      template: './src/index.html'
+    })
+  ]
+}
+
+
+// webpack.dev.js
+const webpack = require('webpack')
+const merge = require('webpack-merge')
+const common = require('./webpack.common')
+
+module.exports = merge(common, {
+  mode: 'development',
+  devtool: 'cheap-eval-module-source-map',
+  devServer: {
+    hot: true,
+    contentBase: 'public'
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ]
+})
+
+// webpack.prod.js
+const merge = require('webpack-merge')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const common = require('./webpack.common')
+
+module.exports = merge(common, {
+  mode: 'production',
+  plugins: [
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin(['public'])
+  ]
+})
+
+```

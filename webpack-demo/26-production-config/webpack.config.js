@@ -4,6 +4,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = (env, argv) => {
+  // env 环境名参数
+  // argv 运行 cli 产生的所有参数
   const config = {
     mode: 'development',
     entry: './src/main.js',
