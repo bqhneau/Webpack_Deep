@@ -919,3 +919,65 @@ module: {
     ]
 }
 ```
+
+
+## 代码分割(Code Splitting)
+- 存在的问题：bundle 体积过大，首次加载并不需要所有模块
+- 解决：分成多个 bundle， 根据实际情况去加载 bundle
+- 平衡：分块太多，又会增加请求数量，物极必反，寻找平衡
+
+### 多入口打包
+- 适用于「多页面应用」
+- 1、一个页面 => 一个 entry
+```js
+// 一个页面 一个入口
+  entry: {
+    index: './src/index.js',
+    album: './src/album.js'
+  },
+
+  plugins: [
+    new CleanWebpackPlugin(),
+    // 搭配 HtmlWebpackPlugin 使用
+    // 通过 chunks 在生成的html中 注入指定的 bundle
+    new HtmlWebpackPlugin({
+      title: 'Multi Entry',
+      template: './src/index.html',
+      filename: 'index.html',
+      chunks: ['index']
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Multi Entry',
+      template: './src/album.html',
+      filename: 'album.html',
+      chunks: ['album']
+    })
+  ]
+```
+- 2、不同页面公共部分 => 单独提取(splitChunks)
+```js
+optimization: {
+    splitChunks: {
+      // 自动提取所有公共模块到单独 bundle
+      chunks: 'all'
+    }
+}
+```
+
+### 动态导入
+- 实现按需加载
+- 动态导入的模块会被「自动分包」
+- 而且会自动提取公共模块
+```js
+  if (hash === '#posts') {
+    // mainElement.appendChild(posts())
+    import(/* webpackChunkName: 'components' */'./posts/posts').then(({ default: posts }) => {
+      mainElement.appendChild(posts())
+    })
+  } else if (hash === '#album') {
+    // mainElement.appendChild(album())
+    import(/* webpackChunkName: 'components' */'./album/album').then(({ default: album }) => {
+      mainElement.appendChild(album())
+    })
+  }
+```

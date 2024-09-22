@@ -10,6 +10,7 @@ module.exports = {
   output: {
     filename: '[name].bundle.js'
   },
+  // 提取公共模块
   optimization: {
     splitChunks: {
       // 自动提取所有公共模块到单独 bundle

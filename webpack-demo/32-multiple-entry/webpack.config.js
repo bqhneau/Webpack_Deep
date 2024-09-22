@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   mode: 'none',
+  // 一个页面 一个入口
   entry: {
     index: './src/index.js',
     album: './src/album.js'
@@ -23,6 +24,8 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
+    // 搭配 HtmlWebpackPlugin 使用
+    // 在生成的html中 注入指定的 bundle
     new HtmlWebpackPlugin({
       title: 'Multi Entry',
       template: './src/index.html',
